@@ -1,0 +1,152 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Modern Calculator</title>
+  <style>
+    * {
+      box-sizing: border-box;
+    }
+    body {
+      background: linear-gradient(135deg, #f0f4f8, #dfe9f3);
+      font-family: 'Segoe UI', sans-serif;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      height: 100vh;
+    }
+    .calculator {
+      background-color: #fff;
+      padding: 20px;
+      border-radius: 20px;
+      box-shadow: 0 15px 25px rgba(0, 0, 0, 0.2);
+      max-width: 320px;
+      width: 100%;
+    }
+    .display {
+      width: 100%;
+      height: 60px;
+      font-size: 2rem;
+      text-align: right;
+      padding: 10px;
+      border: none;
+      margin-bottom: 20px;
+      background: #f9f9f9;
+      border-radius: 10px;
+      color: #333;
+    }
+    .buttons {
+      display: grid;
+      grid-template-columns: repeat(4, 1fr);
+      gap: 15px;
+    }
+    button {
+      padding: 20px;
+      font-size: 1.2rem;
+      border: none;
+      border-radius: 12px;
+      background: #e0e0e0;
+      color: #333;
+      cursor: pointer;
+      transition: 0.2s;
+    }
+    button:hover {
+      background-color: #c4c4c4;
+    }
+    button:active {
+      transform: scale(0.96);
+    }
+    .operator {
+      background-color: #4687ef;
+      color: white;
+    }
+    .operator:hover {
+      background-color: #4687ef;
+    }
+    .equal {
+      background-color: #21f356;
+      color: white;
+      grid-column: span 2;
+    }
+    .equal:hover {
+      background-color: #21f356;
+    }
+    .clear {
+      background-color: #f44336;
+      color: white;
+    }
+    .clear:hover {
+      background-color: #e53935;
+    }
+  </style>
+</head>
+<body>
+
+  <div class="calculator">
+    <input type="text" class="display" id="display" disabled />
+    <div class="buttons">
+      <button onclick="clearDisplay()" class="clear">C</button>
+      <button onclick="append('/')">÷</button>
+      <button onclick="append('*')">×</button>
+      <button onclick="backspace()">⌫</button>
+
+      <button onclick="append('7')">7</button>
+      <button onclick="append('8')">8</button>
+      <button onclick="append('9')">9</button>
+      <button onclick="append('-')" class="operator">−</button>
+
+      <button onclick="append('4')">4</button>
+      <button onclick="append('5')">5</button>
+      <button onclick="append('6')">6</button>
+      <button onclick="append('+')" class="operator">+</button>
+
+      <button onclick="append('1')">1</button>
+      <button onclick="append('2')">2</button>
+      <button onclick="append('3')">3</button>
+      <button onclick="calculate()" class="equal">=</button>
+
+      <button onclick="append('0')" style="grid-column: span 2;">0</button>
+      <button onclick="append('.')">.</button>
+    </div>
+  </div>
+
+  <script>
+    const display = document.getElementById("display");
+
+    function append(value) {
+      display.value += value;
+    }
+
+    function clearDisplay() {
+      display.value = '';
+    }
+
+    function backspace() {
+      display.value = display.value.slice(0, -1);
+    }
+
+    function calculate() {
+      try {
+        display.value = eval(display.value.replace(/÷/g, '/').replace(/×/g, '*'));
+      } catch (e) {
+        display.value = 'Error';
+      }
+    }
+
+    // Keyboard support
+    document.addEventListener('keydown', function (e) {
+      if (e.key.match(/[0-9+\-*/.]/)) {
+        append(e.key);
+      } else if (e.key === 'Enter') {
+        calculate();
+      } else if (e.key === 'Backspace') {
+        backspace();
+      } else if (e.key === 'Delete') {
+        clearDisplay();
+      }
+    });
+  </script>
+
+</body>
+</html>

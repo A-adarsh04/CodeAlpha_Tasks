@@ -1,0 +1,186 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Gallery with Real JPG Images</title>
+    <style>
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+
+        body {
+            font-family: Arial, sans-serif;
+            background: linear-gradient(to right, #232526, #8c90ed);
+            padding: 2rem;
+        }
+
+        h1 {
+            text-align: center;
+            font-size: 2.5rem;
+            margin-bottom: 1.5rem;
+            color: #fafafa;
+        }
+
+        .filters {
+            display: flex;
+            justify-content: center;
+            flex-wrap: wrap;
+            gap: 10px;
+            margin-bottom: 2rem;
+        }
+
+        .filters button {
+            padding: 10px 20px;
+            background-color: #007bff;
+            color: white;
+            border: none;
+            border-radius: 20px;
+            cursor: pointer;
+            transition: background 0.3s;
+        }
+
+        .filters button:hover {
+            background-color: #0056b3;
+        }
+
+        .gallery {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+            gap: 1rem;
+        }
+
+        .gallery img {
+            width: 100%;
+            height: 200px;
+            object-fit: cover;
+            border-radius: 10px;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+            transition: transform 0.3s;
+            cursor: pointer;
+        }
+
+        .gallery img:hover {
+            transform: scale(1.03);
+        }
+
+        .lightbox {
+            display: none;
+            position: fixed;
+            inset: 0;
+            background: rgba(0, 0, 0, 0.9);
+            justify-content: center;
+            align-items: center;
+            z-index: 999;
+            flex-direction: column;
+        }
+
+        .lightbox img {
+            max-width: 90%;
+            max-height: 80%;
+            border-radius: 10px;
+        }
+
+        .lightbox .close {
+            position: absolute;
+            top: 30px;
+            right: 40px;
+            font-size: 2.5rem;
+            color: white;
+            cursor: pointer;
+        }
+
+        .lightbox button {
+            margin: 1rem;
+            font-size: 2rem;
+            padding: 0.5rem 1rem;
+            border: none;
+            background: white;
+            border-radius: 50%;
+            cursor: pointer;
+        }
+
+        @media (max-width: 600px) {
+            .gallery img {
+                height: 150px;
+            }
+        }
+    </style>
+</head>
+
+<body>
+
+    <h1>Image Gallery</h1>
+
+    <div class="filters">
+        <button onclick="filterImages('all')">All</button>
+        <button onclick="filterImages('nature')">Nature</button>
+        <button onclick="filterImages('city')">City</button>
+        <button onclick="filterImages('animals')">Animals</button>
+        <button onclick="filterImages('mountains')">Mountains</button>
+    </div>
+
+    <div class="gallery">
+        <img src="https://images.pexels.com/photos/34950/pexels-photo.jpg" data-category="nature"
+            onclick="openLightbox(this)">
+        <img src="https://images.pexels.com/photos/355747/pexels-photo-355747.jpeg" data-category="nature"
+            onclick="openLightbox(this)">
+        <img src="https://images.pexels.com/photos/373912/pexels-photo-373912.jpeg" data-category="city"
+            onclick="openLightbox(this)">
+        <img src="https://images.pexels.com/photos/417273/pexels-photo-417273.jpeg" data-category="city"
+            onclick="openLightbox(this)">
+        <img src="https://images.pexels.com/photos/145939/pexels-photo-145939.jpeg" data-category="animals"
+            onclick="openLightbox(this)">
+        <img src="https://images.pexels.com/photos/617278/pexels-photo-617278.jpeg" data-category="animals"
+            onclick="openLightbox(this)">
+        <img src="https://images.pexels.com/photos/753626/pexels-photo-753626.jpeg" data-category="mountains"
+            onclick="openLightbox(this)">
+        <img src="https://images.pexels.com/photos/552785/pexels-photo-552785.jpeg" data-category="mountains"
+            onclick="openLightbox(this)">
+    </div>
+
+    <div id="lightbox" class="lightbox">
+        <span class="close" onclick="closeLightbox()">&times;</span>
+        <img id="lightbox-img" src="" />
+        <div>
+            <button onclick="navigate(-1)">&#10094;</button>
+            <button onclick="navigate(1)">&#10095;</button>
+        </div>
+    </div>
+
+    <script>
+        let currentIndex = 0;
+        let images = [];
+
+        function openLightbox(img) {
+            images = Array.from(document.querySelectorAll('.gallery img'))
+                .filter(el => el.style.display !== "none");
+            currentIndex = images.indexOf(img);
+            document.getElementById("lightbox-img").src = img.src;
+            document.getElementById("lightbox").style.display = "flex";
+        }
+
+        function closeLightbox() {
+            document.getElementById("lightbox").style.display = "none";
+        }
+
+        function navigate(step) {
+            currentIndex += step;
+            if (currentIndex < 0) currentIndex = images.length - 1;
+            if (currentIndex >= images.length) currentIndex = 0;
+            document.getElementById("lightbox-img").src = images[currentIndex].src;
+        }
+
+        function filterImages(category) {
+            document.querySelectorAll('.gallery img').forEach(img => {
+                img.style.display = category === 'all' || img.dataset.category === category ? 'block' : 'none';
+            });
+        }
+    </script>
+
+</body>
+
+</html>

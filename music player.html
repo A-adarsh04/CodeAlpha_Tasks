@@ -1,0 +1,287 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Custom Music Player</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <style>
+    * { box-sizing: border-box; }
+    body {
+      margin: 0;
+      font-family: 'Segoe UI', sans-serif;
+      background: linear-gradient(to right, #232526, #145d27);
+      color: white;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      height: 100vh;
+    }
+
+    .player {
+      width: 350px;
+      background: #2c2f33;
+      border-radius: 20px;
+      box-shadow: 0 10px 30px rgba(0,0,0,0.5);
+      overflow: hidden;
+      padding: 20px;
+      text-align: center;
+    }
+
+    .player img {
+      width: 100%;
+      height: 200px;
+      object-fit: cover;
+      border-radius: 12px;
+      margin-bottom: 15px;
+    }
+
+    .title {
+      font-size: 1.2rem;
+      margin: 5px 0;
+      font-weight: bold;
+    }
+
+    .artist {
+      font-size: 0.9rem;
+      color: #ccc;
+      margin-bottom: 10px;
+    }
+
+    .controls {
+      display: flex;
+      justify-content: center;
+      gap: 15px;
+      margin-top: 10px;
+    }
+
+    .controls button {
+      background: none;
+      border: none;
+      color: white;
+      font-size: 1.5rem;
+      cursor: pointer;
+      transition: transform 0.2s;
+    }
+
+    .controls button:hover {
+      transform: scale(1.2);
+    }
+
+    .progress-container {
+      margin: 15px 0;
+      display: flex;
+      align-items: center;
+    }
+
+    .progress {
+      flex: 1;
+      height: 6px;
+      background: #6c6b6b;
+      border-radius: 3px;
+      overflow: hidden;
+      margin: 0 10px;
+      cursor: pointer;
+    }
+
+    .progress-bar {
+      height: 100%;
+      background: #1db954;
+      width: 0%;
+    }
+
+    .time {
+      font-size: 0.8rem;
+      color: #aaa;
+    }
+
+    .volume-container {
+      display: flex;
+      align-items: center;
+      margin-top: 10px;
+    }
+
+    .volume-container input {
+      width: 100%;
+    }
+
+    .playlist {
+      margin-top: 20px;
+      text-align: left;
+    }
+
+    .playlist h3 {
+      margin-bottom: 8px;
+      font-size: 1rem;
+      color: #1db954;
+    }
+
+    .playlist-item {
+      font-size: 0.9rem;
+      padding: 5px 0;
+      border-bottom: 1px solid #444;
+      cursor: pointer;
+    }
+
+    .playlist-item.active {
+      color: #1db954;
+      font-weight: bold;
+    }
+  </style>
+</head>
+<body>
+
+  <div class="player">
+    <img id="cover" src="" alt="Album Art" />
+    <div class="title" id="title">SONG TITLE</div>
+    <div class="artist" id="artist">Artist</div>
+
+    <div class="progress-container">
+      <span class="time" id="current-time">0:00</span>
+      <div class="progress" onclick="seek(event)">
+        <div class="progress-bar" id="progress-bar"></div>
+      </div>
+      <span class="time" id="duration">0:00</span>
+    </div>
+
+    <div class="controls">
+      <button onclick="prevSong()">⏮️</button>
+      <button onclick="togglePlay()">⏯️</button>
+      <button onclick="nextSong()">⏭️</button>
+    </div>
+
+    <div class="volume-container">
+      <input type="range" id="volume" min="0" max="1" step="0.01" onchange="setVolume(this.value)">
+    </div>
+
+    <div class="playlist">
+      <h3>🎵 Playlist</h3>
+      <div id="playlist-container"></div>
+    </div>
+  </div>
+
+  <audio id="audio" ontimeupdate="updateProgress()" onended="nextSong()"></audio>
+
+  <script>
+    const songs = [
+  {
+    title: "Infinity",
+    artist: "Jay Man",
+    src: "https://www.soundhelix.com/examples/mp3/SoundHelix-Song-1.mp3",
+    cover: "https://images.unsplash.com/photo-1511671782779-c97d3d27a1d4?fit=crop&w=500&h=300"
+  },
+  {
+    title: "Epic Inspiration",
+    artist: "AudioCoffee",
+    src: "https://www.soundhelix.com/examples/mp3/SoundHelix-Song-2.mp3",
+    cover: "https://images.unsplash.com/photo-1497032628192-86f99bcd76bc?fit=crop&w=500&h=300"
+  },
+  {
+    title: "Acoustic Breeze",
+    artist: "Bensound",
+    src: "https://www.soundhelix.com/examples/mp3/SoundHelix-Song-3.mp3",
+    cover: "https://images.unsplash.com/photo-1470225620780-dba8ba36b745?fit=crop&w=500&h=300"
+  }
+];
+
+
+
+    let currentIndex = 0;
+    const audio = document.getElementById("audio");
+    const title = document.getElementById("title");
+    const artist = document.getElementById("artist");
+    const cover = document.getElementById("cover");
+    const progressBar = document.getElementById("progress-bar");
+    const currentTimeEl = document.getElementById("current-time");
+    const durationEl = document.getElementById("duration");
+    const volumeSlider = document.getElementById("volume");
+    const playlistContainer = document.getElementById("playlist-container");
+
+    function loadSong(index) {
+      const song = songs[index];
+      audio.src = song.src;
+      title.textContent = song.title;
+      artist.textContent = song.artist;
+      cover.src = song.cover;
+      highlightPlaylist(index);
+    }
+
+    function playSong() {
+      audio.play();
+    }
+
+    function pauseSong() {
+      audio.pause();
+    }
+
+    function togglePlay() {
+      if (audio.paused) {
+        playSong();
+      } else {
+        pauseSong();
+      }
+    }
+
+    function nextSong() {
+      currentIndex = (currentIndex + 1) % songs.length;
+      loadSong(currentIndex);
+      playSong();
+    }
+
+    function prevSong() {
+      currentIndex = (currentIndex - 1 + songs.length) % songs.length;
+      loadSong(currentIndex);
+      playSong();
+    }
+
+    function updateProgress() {
+      const { duration, currentTime } = audio;
+      progressBar.style.width = `${(currentTime / duration) * 100}%`;
+      currentTimeEl.textContent = formatTime(currentTime);
+      durationEl.textContent = formatTime(duration);
+    }
+
+    function seek(e) {
+      const width = e.currentTarget.clientWidth;
+      const clickX = e.offsetX;
+      const duration = audio.duration;
+      audio.currentTime = (clickX / width) * duration;
+    }
+
+    function setVolume(value) {
+      audio.volume = value;
+    }
+
+    function formatTime(time) {
+      const mins = Math.floor(time / 60) || 0;
+      const secs = Math.floor(time % 60) || 0;
+      return `${mins}:${secs < 10 ? '0' + secs : secs}`;
+    }
+
+    function highlightPlaylist(index) {
+      const items = document.querySelectorAll('.playlist-item');
+      items.forEach((el, i) => {
+        el.classList.toggle('active', i === index);
+      });
+    }
+
+    // Build playlist
+    songs.forEach((song, index) => {
+      const div = document.createElement("div");
+      div.textContent = `${song.title} — ${song.artist}`;
+      div.classList.add("playlist-item");
+      div.onclick = () => {
+        currentIndex = index;
+        loadSong(index);
+        playSong();
+      };
+      playlistContainer.appendChild(div);
+    });
+
+    // Init
+    loadSong(currentIndex);
+    volumeSlider.value = 0.7;
+    audio.volume = 0.7;
+  </script>
+
+</body>
+</html>
